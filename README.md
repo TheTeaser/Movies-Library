@@ -4,7 +4,7 @@
 
 ## WRRC
 
-![Alt text](WRRC.PNG)
+![Alt text](./WRRC/WRRC.PNG)
 
 ## Overview
 
