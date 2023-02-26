@@ -25,13 +25,7 @@ server.use(cors());
 
 const PORT = 3000;
 
-//Error Handling:
-server.use(function (err, req, res, text) {
-    console.error(err.stack);
-    res.type('text/plain');
-    res.status(500).send("Sorry, Something went wrong");
 
-})
 
 //Rounting:-
 
@@ -51,6 +45,15 @@ server.get('/favorite', (req, res) => {
 })
 
 
+//Error Handling: "MiddleWare"
+function errorHandler(error, req, res) {
+    const err = {
+        status: 500,
+        responseText: "Sorry, something went wrong"
+    }
+    res.status(err.status).send(err);
+    console.log(err);
+}
 
 //Default route: ususally used for 404, when the client use an address that is not defined in the server, the server will check all the routes
 //then if non is found, it will redirect him to here.
@@ -63,7 +66,6 @@ server.get('*', (req, res) => {
     res.status(404).send("Page not found");
 
 })
-
 
 
 //Now to inform the server aobut it's port we need to call the next function which is:
