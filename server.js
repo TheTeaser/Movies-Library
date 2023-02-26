@@ -3,87 +3,198 @@
 //Importing Libraries
 
 const express = require('express');
-const cors = require('cors');
-const data = require('./Movie Data/data.json');
-//To use a specific data from data.json file we need to use the constructor as follows:
+const server = express();
 
-function Movie(title, poster_path, overview) {
+const cors = require('cors');
+server.use(cors());
+
+const data = require('./Movie Data/data.json');
+
+const axios = require('axios'); //provide the ability to use a library of methods to send request to other APIs
+
+const dotenv = require('dotenv')
+dotenv.config();
+
+server.use(errorHandler);
+
+function Movie(id, title, release_date, poster_path, overview) {
+    this.id = id;
     this.title = title;
+    this.release_date = release_date;
     this.poster_path = poster_path;
     this.overview = overview;
 }
 
-//Saving the Express methods to the server and the common practise is to name it either server or app.
-
-const server = express();
-
-//We use cors to let the server accept & open for all clients requests.
-
-server.use(cors());
-
-//Store IP address in PORT vairable (Must be CAP) and the range should be from 3000 to 5000 as other servers have other ranges.
-
 const PORT = 3000;
-
-
 
 //Rounting:-
 
-//.get() is function used to get data, since we are getting data from 'req' then we must return data using the 'res' using res.send()
+server.get('/', homeHandler)
 
-server.get('/', (req, res) => {
+server.get('/favorite', favHandler)
 
+server.get('/trending', trendHandler)
+
+server.get('/search', searchHandler)
+
+server.get('/searchPeople', searchPeHandler)
+
+server.get('/searchCompanies, SearchCoHandler')
+
+server.get('/error', errorHandler)
+
+server.get('*', defaultHandler)
+
+
+
+
+
+
+// Function handlers:-
+
+function homeHandler(req, res) {
     let moviesData = new Movie(data.title, data.poster_path, data.overview);
 
     res.status(200).send(moviesData);
-})
+    // console.log(moviesData);
+}
 
-server.get('/favorite', (req, res) => {
+function favHandler(req, res) {
     let str = "Welcome to the favorite page";
 
-    res.send(str);
-})
+    res.status(200).send(str);
 
+    // console.log(str);
+
+}
+
+function trendHandler(req, res) {
+    // const keyAPI='';
+    //My Key for Mr Fadi testing purposes is:  4d0199f573365c7bbfd1f54a8e476d04     
+
+    // const APIKey= process.env.APIKey;
+    // const URL=`https://api.themoviedb.org/3/movie/popular?api_key=${APIKey}&language=en-US&page=1`;
+    // let axiosRes=await axios.get(URL);
+    // let mapRes= axiosRes.data.results.map((item)=>{
+    //         let trendMovie=new Movie(item.id,item.title,item.release_date,item.poster_path, item.overview);
+    //         return trendMovie
+    //     });
+    // res.send(mapRes);
+    //     // console.log(axiosRes.data);
+    try {
+        const APIKey = process.env.APIKey;
+        const URL = `https://api.themoviedb.org/3/movie/popular?api_key=${APIKey}&language=en-US&page=1`;
+        axios.get(URL)
+            .then((result) => {
+                //Code that depends on Axios function put it here
+                let mapRes = result.data.results.map((item) => {
+                    let trendMovie = new Movie(item.id, item.title, item.release_date, item.poster_path, item.overview);
+                    return trendMovie;
+                });
+                res.send(mapRes);
+            })
+            //Code that does not depend on Axios put it here
+            .catch((error) => {
+                console.log("Sorry, Something went wrong");
+                res.status(500).send(err)
+            })
+    }
+    catch (error) {
+        errorHandler(error, req, res);
+    }
+
+}
+
+function searchHandler(req, res) {
+    try {
+        const APIKey = process.env.APIKey;
+        const url = `https://api.themoviedb.org/3/search/movie?api_key=${APIKey}&language=en-US&query=The&page=2`;
+        axios.get(url)
+            .then((result2) => {
+                let mapRes = result2.data.results;
+                res.send(mapRes);
+            })
+            .catch((error) => {
+                res.status(500).send(error)
+            })
+
+    }
+    catch (error) {
+        errorHandler(error, req, res);
+    }
+    // console.log();
+
+}
+function searchPeHandler(req, res) {
+    try {
+        const APIKey = process.env.APIKey;
+        const url = `https://api.themoviedb.org/3/search/person?api_key=${APIKey}&language=en-US&page=1&include_adult=false`;
+        axios.get(url)
+            .then((result3) => {
+                let mapRes = result3.data.results;
+                res.send(mapRes);
+            })
+            .catch((error) => {
+                res.status(500).send(error)
+            })
+
+    }
+    catch (error) {
+        errorHandler(error, req, res);
+    }
+    // console.log();
+
+}
+
+function searchCoHandler(req, res) {
+    try {
+        const APIKey = process.env.APIKey;
+        const url = `https://api.themoviedb.org/3/search/company?api_key=${APIKey}&page=1`;
+        axios.get(url)
+            .then((result4) => {
+                let mapRes = result4.data.results;
+                res.send(mapRes);
+            })
+            .catch((error) => {
+                res.status(500).send(error)
+            })
+
+    }
+    catch (error) {
+        errorHandler(error, req, res);
+    }
+    // console.log();
+
+}
+
+function defaultHandler(req, res) {
+
+    res.status(404).send("Page not found");
+
+    // console.log();
+
+}
 
 //Error Handling: "MiddleWare"
-function errorHandler(error, req, res) {
+function errorHandler(error, req, res,next) {
     const err = {
         status: 500,
         responseText: "Sorry, something went wrong"
     }
-    res.status(err.status).send(err);
-    console.log(err);
+    res.status(500).send(err);
+    next();
+    // console.log(err);
 }
 
-//Default route: ususally used for 404, when the client use an address that is not defined in the server, the server will check all the routes
-//then if non is found, it will redirect him to here.
 
-server.get('*', (req, res) => {
+//Server Listener
 
-    //.status() assign a status to the response and you can check the status through: (Webpage -> Inspect -> Network tab)
-    // res.status(404).send("Where you goin homeboy?");
-
-    res.status(404).send("Page not found");
-
-})
-
-
-//Now to inform the server aobut it's port we need to call the next function which is:
-//http://localhost:3000 --> (IP Address: localhost), (PORT #: 3000)
 server.listen(PORT, () => {
 
     console.log(`Listening on ${PORT}   :   I am ready!`);
 })
 
+// Page address
+// https://localhost:3000/
 
-
-
-
-
-// server.get('*',(req,res)=>{
-//     res.status(404).send("default route");
-// })
-
-
-//Refrences:
-//  https://developer.mozilla.org/en-US/docs/Web/HTTP/Status ----  Status Codes
+//nodemon
