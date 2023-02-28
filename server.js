@@ -15,6 +15,12 @@ const axios = require('axios'); //provide the ability to use a library of method
 const dotenv = require('dotenv')
 dotenv.config();
 
+const pg=require('pg');
+
+server.use(express.json());
+
+const APIKey = process.env.APIKey;
+
 server.use(errorHandler);
 
 function Movie(id, title, release_date, poster_path, overview) {
@@ -26,6 +32,11 @@ function Movie(id, title, release_date, poster_path, overview) {
 }
 
 const PORT = 3000;
+
+//Create OBJ from client
+// DB Key= postgersql://localhost:5432/lab13 for TA Fadi
+const client = new pg.Client(process.env.DATABASE_URL);
+
 
 //Rounting:-
 
@@ -39,7 +50,11 @@ server.get('/search', searchHandler)
 
 server.get('/searchPeople', searchPeHandler)
 
-server.get('/searchCompanies, SearchCoHandler')
+server.get('/searchCompanies', searchCoHandler)
+
+server.get('/addMovie', getMoviehandler)
+
+server.get('/addMovie', addMoviehandler)
 
 server.get('/error', errorHandler)
 
@@ -72,17 +87,8 @@ function trendHandler(req, res) {
     // const keyAPI='';
     //My Key for Mr Fadi testing purposes is:  4d0199f573365c7bbfd1f54a8e476d04     
 
-    // const APIKey= process.env.APIKey;
-    // const URL=`https://api.themoviedb.org/3/movie/popular?api_key=${APIKey}&language=en-US&page=1`;
-    // let axiosRes=await axios.get(URL);
-    // let mapRes= axiosRes.data.results.map((item)=>{
-    //         let trendMovie=new Movie(item.id,item.title,item.release_date,item.poster_path, item.overview);
-    //         return trendMovie
-    //     });
-    // res.send(mapRes);
-    //     // console.log(axiosRes.data);
+   
     try {
-        const APIKey = process.env.APIKey;
         const URL = `https://api.themoviedb.org/3/movie/popular?api_key=${APIKey}&language=en-US&page=1`;
         axios.get(URL)
             .then((result) => {
@@ -107,7 +113,6 @@ function trendHandler(req, res) {
 
 function searchHandler(req, res) {
     try {
-        const APIKey = process.env.APIKey;
         const url = `https://api.themoviedb.org/3/search/movie?api_key=${APIKey}&language=en-US&query=The&page=2`;
         axios.get(url)
             .then((result2) => {
@@ -127,7 +132,6 @@ function searchHandler(req, res) {
 }
 function searchPeHandler(req, res) {
     try {
-        const APIKey = process.env.APIKey;
         const url = `https://api.themoviedb.org/3/search/person?api_key=${APIKey}&language=en-US&page=1&include_adult=false`;
         axios.get(url)
             .then((result3) => {
@@ -148,7 +152,6 @@ function searchPeHandler(req, res) {
 
 function searchCoHandler(req, res) {
     try {
-        const APIKey = process.env.APIKey;
         const url = `https://api.themoviedb.org/3/search/company?api_key=${APIKey}&page=1`;
         axios.get(url)
             .then((result4) => {
@@ -175,6 +178,31 @@ function defaultHandler(req, res) {
 
 }
 
+function getMoviehandler(req,res){
+    const sql='SELECT * FROM movieTable';
+    client.query(sql)
+    .then((data)=>{
+        res.send(data.rows);
+    })
+    .catch((error)=>{
+        res.status(500).send(error);
+    })
+}
+
+function addMoviehandler(req,res){
+    const mov=req.body;
+    const sql='INSERT INTO movieTable(title,overwiew) VALUES ($49,$29) RETURNING *;';
+    let values= [mov.title,mov.overview];
+    client.query(sql,values)
+        .then((data)=>{
+            res.send(data.row);
+        })
+
+        .catch((error)=>{
+            res.status(500).send(error);
+        })
+}
+
 //Error Handling: "MiddleWare"
 function errorHandler(error, req, res,next) {
     const err = {
@@ -186,6 +214,9 @@ function errorHandler(error, req, res,next) {
     // console.log(err);
 }
 
+//Connect the server with the Database (called lab13):
+client.connect()
+.then(()=>{
 
 //Server Listener
 
@@ -193,8 +224,8 @@ server.listen(PORT, () => {
 
     console.log(`Listening on ${PORT}   :   I am ready!`);
 })
-
+})
 // Page address
 // https://localhost:3000/
-
+// localhost:5432 is the routing port for PG.
 //nodemon
