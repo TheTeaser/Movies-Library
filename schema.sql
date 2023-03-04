@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS movieTable;
+DROP TABLE IF EXISTS movietable;
 
-CREATE TABLE IF NOT EXISTS movieTable(
+CREATE TABLE IF NOT EXISTS movietable(
     id SERIAL PRIMARY KEY,
     title VARCHAR(255),
     overview VARCHAR(10000)
