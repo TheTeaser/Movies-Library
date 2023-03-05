@@ -56,11 +56,11 @@ server.post('/addFavMovie', addMovieHandler)
 
 server.get('/addFavMovie', getMovieHandler)
 
-server.delete('/addFavMovie/:id', deleteFavMovieHandler) //You can put anything instead of "id" as it's just an alias.
+server.delete('/addFavMovie/DELETE/:id', deleteFavMovieHandler) //You can put anything instead of "id" as it's just an alias.
 
-server.put('/addFavMovie/:id', updateFavMovieHandler) //.put Delectes the old data and update it to the new one.
+server.put('/addFavMovie/UPDATE/:id', updateFavMovieHandler) //.put Delectes the old data and update it to the new one.
 
-server.get('/addFavMovie/:id', getSpecFavMovieHandler) //usual .get but it will get a specific FavMovie using a provided ID.
+server.get('/addFavMovie/getMovie/:id', getSpecFavMovieHandler) //usual .get but it will get a specific FavMovie using a provided ID.
 
 server.get('/error', errorHandler)
 
