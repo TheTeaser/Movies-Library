@@ -30,8 +30,8 @@ function Movie(id, title, release_date, poster_path, overview) {
     this.poster_path = poster_path;
     this.overview = overview;
 }
-
-const PORT = 3000;
+//We did that to the PORT so when we upload our code to hosting website the website will get the needed data from the .env file and build upon it.
+const PORT = process.env.PORT || 3000; //We used || as a precaution and to minimise the errors.
 
 //Create OBJ from client
 // DB Key= postgersql://localhost:5432/lab13 for TA Fadi
