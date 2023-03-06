@@ -30,8 +30,8 @@ function Movie(id, title, release_date, poster_path, overview) {
     this.poster_path = poster_path;
     this.overview = overview;
 }
-
-const PORT = 3000;
+//We did that to the PORT so when we upload our code to hosting website the website will get the needed data from the .env file and build upon it.
+const PORT = process.env.PORT || 3000; //We used || as a precaution and to minimise the errors.
 
 //Create OBJ from client
 // DB Key= postgersql://localhost:5432/lab13 for TA Fadi
@@ -56,11 +56,11 @@ server.post('/addFavMovie', addMovieHandler)
 
 server.get('/addFavMovie', getMovieHandler)
 
-server.delete('/addFavMovie/:id', deleteFavMovieHandler) //You can put anything instead of "id" as it's just an alias.
+server.delete('/addFavMovie/DELETE/:id', deleteFavMovieHandler) //You can put anything instead of "id" as it's just an alias.
 
-server.put('/addFavMovie/:id', updateFavMovieHandler) //.put Delectes the old data and update it to the new one.
+server.put('/addFavMovie/UPDATE/:id', updateFavMovieHandler) //.put Delectes the old data and update it to the new one.
 
-server.get('/addFavMovie/:id', getSpecFavMovieHandler) //usual .get but it will get a specific FavMovie using a provided ID.
+server.get('/addFavMovie/getMovie/:id', getSpecFavMovieHandler) //usual .get but it will get a specific FavMovie using a provided ID.
 
 server.get('/error', errorHandler)
 
